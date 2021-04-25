@@ -21,6 +21,8 @@ namespace AlertmanagerSmsNotifier
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHttpClient();
+
             services.AddOptions<GlobalConfigs>()
                 .Bind(Configuration)
                 .ValidateDataAnnotations();
@@ -29,12 +31,15 @@ namespace AlertmanagerSmsNotifier
                 .Bind(Configuration.GetSection(SmsIrConfigs.Position))
                 .ValidateDataAnnotations();
 
-            services.AddTransient<ISmsSender, SmsIrSender>();
+            services.AddOptions<ArmaghanConfigs>()
+                            .Bind(Configuration.GetSection(ArmaghanConfigs.Position))
+                            .ValidateDataAnnotations();
+
+            services.AddTransient<ISmsSender, ArmaghanSender>();
 
             services.AddControllers();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
