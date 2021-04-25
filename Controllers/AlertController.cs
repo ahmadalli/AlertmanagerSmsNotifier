@@ -28,9 +28,9 @@ namespace AlertmanagerSmsNotifier.Controllers
         }
 
         [HttpGet("test")]
-        public async Task<ActionResult> TestSms(string receiver, string message)
+        public async Task<ActionResult> TestSms(string recipient, string message)
         {
-            await _smsSender.SendSms(message, new[] { receiver });
+            await _smsSender.SendSms(message, new[] { recipient });
             return Ok();
         }
 
