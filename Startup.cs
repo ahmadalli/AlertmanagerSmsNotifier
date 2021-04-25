@@ -35,7 +35,18 @@ namespace AlertmanagerSmsNotifier
                             .Bind(Configuration.GetSection(ArmaghanConfigs.Position))
                             .ValidateDataAnnotations();
 
-            services.AddTransient<ISmsSender, ArmaghanSender>();
+            var provider = Configuration.Get<GlobalConfigs>().SmsProvider;
+            switch (provider)
+            {
+                case SmsProvider.SmsIr:
+                    services.AddTransient<ISmsSender, SmsIrSender>();
+                    break;
+                case SmsProvider.Armaghan:
+                    services.AddTransient<ISmsSender, ArmaghanSender>();
+                    break;
+                default:
+                    throw new System.Exception("SmsProvider hasn't been implemented yet");
+            }
 
             services.AddControllers();
         }
