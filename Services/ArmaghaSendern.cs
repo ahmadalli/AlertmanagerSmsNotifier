@@ -40,12 +40,12 @@ namespace AlertmanagerSmsNotifier.Services
 
                 var result = await _httpClient.GetAsync(url);
 
-                if (!result.IsSuccessStatusCode)
+                var content = await result.Content.ReadAsStringAsync();
+                if (!result.IsSuccessStatusCode || content.Contains("error", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    var content = await result.Content.ReadAsStringAsync();
                     _logger.LogError("armaghan sms failed" +
                         $"{Environment.NewLine}Status Code: {result.StatusCode}" +
-                        $"{Environment.NewLine}Message: {content}");
+                        $"{Environment.NewLine}Message:{Environment.NewLine}{content.Trim()}");
                 }
             }
         }
