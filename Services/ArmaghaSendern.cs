@@ -35,8 +35,8 @@ namespace AlertmanagerSmsNotifier.Services
                     $"originator={configs.Originator}" +
                     $"&destination={recipient}" +
                     $"&content={HttpUtility.UrlEncode(text)}" +
-                    $"&username={configs.Username}" +
-                    $"&password={configs.Password}";
+                    $"&username={HttpUtility.UrlEncode(configs.Username)}" +
+                    $"&password={HttpUtility.UrlEncode(configs.Password)}";
 
                 var result = await _httpClient.GetAsync(url);
 
