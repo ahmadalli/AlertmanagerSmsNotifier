@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -31,6 +32,12 @@ namespace AlertmanagerSmsNotifier.Services
 
             foreach (var recipient in recipients)
             {
+                if (string.IsNullOrWhiteSpace(recipient) || !Regex.IsMatch(recipient, @"^\d+$") || recipient.Length != 12)
+                {
+                    _logger.LogError($"invalid recipient {recipient}");
+                    continue;
+                }
+
                 var url = $"http://negar.armaghan.net/sms/url_send.html?" +
                     $"originator={configs.Originator}" +
                     $"&destination={recipient}" +
