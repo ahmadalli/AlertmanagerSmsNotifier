@@ -51,7 +51,11 @@ namespace AlertmanagerSmsNotifier.Controllers
                     recipients = currentConfigs.RecipientGroups[alert.Annotations["recipient-group"]];
                 }
 
-                var message = $"{alert.Status}{Environment.NewLine}{alert.Annotations["summary"]}:{Environment.NewLine}{alert.Annotations["description"]}";
+                var message = $"{alert.Status}{Environment.NewLine}{alert.Annotations["summary"]}";
+                if (alert.Annotations.ContainsKey("description"))
+                {
+                    message += $":{Environment.NewLine}{alert.Annotations["description"]}";
+                }
 
                 tasks.Add(_smsSender.SendSms(message, recipients.ToArray()));
             }
