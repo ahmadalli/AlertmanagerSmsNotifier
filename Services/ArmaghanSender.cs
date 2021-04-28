@@ -1,7 +1,9 @@
 ﻿using AlertmanagerSmsNotifier.Models.Configs;
 using AlertmanagerSmsNotifier.Services.Interfaces;
+using Humanizer;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Polly;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,6 +31,13 @@ namespace AlertmanagerSmsNotifier.Services
         {
             var configs = _configsMonitor.CurrentValue;
 
+            var policy = Policy
+                .Handle<TaskCanceledException>()
+                .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Min(300, Math.Pow(2, retryAttempt) * 10)),
+                    (exception, nextTry) =>
+                    {
+                        _logger.LogWarning(exception, $"sending sms failed. will retry in {nextTry.Humanize()}");
+                    });
 
             foreach (var recipient in recipients)
             {
@@ -45,7 +54,7 @@ namespace AlertmanagerSmsNotifier.Services
                     $"&username={HttpUtility.UrlEncode(configs.Username)}" +
                     $"&password={HttpUtility.UrlEncode(configs.Password)}";
 
-                var result = await _httpClient.GetAsync(url);
+                var result = await policy.ExecuteAsync(() => _httpClient.GetAsync(url));
 
                 var content = await result.Content.ReadAsStringAsync();
                 if (!result.IsSuccessStatusCode || content.Contains("error", StringComparison.InvariantCultureIgnoreCase))
