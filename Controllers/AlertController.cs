@@ -50,12 +50,17 @@ namespace AlertmanagerSmsNotifier.Controllers
         else
         {
           var currentConfigs = _globalConfigsMonitor.CurrentValue;
-
-          var recipients = currentConfigs.DefaultRecipients;
+          string recipientId = null;
           if (alert.Labels.ContainsKey("recipients") && currentConfigs.RecipientGroups.ContainsKey(alert.Labels["recipients"]))
           {
-            recipients = currentConfigs.RecipientGroups[alert.Labels["recipients"]];
+            recipientId = alert.Labels["recipients"];
           }
+          if (alert.Labels.ContainsKey("owner-team") && currentConfigs.RecipientGroups.ContainsKey(alert.Labels["owner-team"]))
+          {
+            recipientId = alert.Labels["owner-team"];
+          }
+
+          var recipients = recipientId != null ? currentConfigs.RecipientGroups[recipientId] : currentConfigs.DefaultRecipients;
 
           var message = $"{alert.Status}{Environment.NewLine}{alert.Annotations["summary"]}";
           if (alert.Annotations.ContainsKey("description"))
